@@ -9,6 +9,8 @@ class CensusExtractor():
         self.dir = dir
         self.zip_list = list()
         
+    def get_zip_list(self):
+        return self.zip_list
     def fetch_zip_list(self):
                
         try:
