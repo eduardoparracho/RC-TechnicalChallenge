@@ -41,6 +41,7 @@ class CensusExtractor():
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:
                         file.write(chunk)
+                file.close()
             
         return response.status_code
 
