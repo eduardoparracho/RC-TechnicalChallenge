@@ -17,6 +17,7 @@ class ZipParser:
             with ZipFile(file_dir, 'r') as zipObj:
                 zipObj.extractall(path=self.dir)
                 self.unzip_list.append(zipObj.namelist())
+                zipObj.close()
         except FileNotFoundError:
             print(f"Error: The file {file_dir} was not found.")
         except PermissionError:
