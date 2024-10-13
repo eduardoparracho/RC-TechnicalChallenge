@@ -57,6 +57,7 @@ class ZipParser:
             
             df_region = pd.concat([df_region,df2], ignore_index=True)
             df_region.drop_duplicates(inplace=True)
+            df_region.state = df_region.state.str.replace(' - ..$', '', regex=True)
             
             
         df_country.columns = ['country_name','gini_index']
