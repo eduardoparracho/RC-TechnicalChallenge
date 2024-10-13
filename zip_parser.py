@@ -4,6 +4,27 @@ import pandas as pd
 
 class ZipParser:
     def __init__(self, dir): 
+        """
+        Initialize a ZipParser object.
+
+        Parameters
+        ----------
+        dir : str
+            Path to the directory where the zip files are located.
+
+        Attributes
+        ----------
+        dir : str
+            Path to the directory where the zip files are located.
+        unzip_list : list
+            List of unzipped files.
+        df_country, df_district, df_region : pandas.DataFrame
+            DataFrames to store the data from the unzipped files.
+
+        Returns
+        -------
+        None
+        """
         if not os.path.exists(dir):
             os.makedirs(dir)
         
@@ -15,9 +36,29 @@ class ZipParser:
         self.df_region = pd.DataFrame(columns=['state', 'gini','district_id'])
             
     def get_unzip_list(self):
+        """
+        Get the list of unzipped files.
+
+        Returns
+        -------
+        list
+            List of unzipped files.
+        """
         return self.unzip_list
     
-    def unzip_file(self, file_dir):
+    def __unzip_file(self, file_dir):
+        """
+        Unzip a zip file and add the extracted file name to the unzip_list.
+
+        Parameters
+        ----------
+        file_dir : str
+            Path to the zip file to be unzipped.
+
+        Returns
+        -------
+        None
+        """
         try:
             with ZipFile(file_dir, 'r') as zipObj:
                 zipObj.extractall(path=self.dir)
@@ -30,7 +71,22 @@ class ZipParser:
         except Exception as e:
             print(f"An error occurred while extracting {file_dir}: {e}")
 
-    def create_dataframes(self):
+    def __create_dataframes(self):
+        """
+        Create DataFrames for country, district and region from the unzipped files.
+
+        It reads each Excel file, extracts the state and Gini index columns, and assigns them to the
+        appropriate DataFrame. 
+        The DataFrames are cleaned,renamed and reordered to match the expected format of the DB tables.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         df_country = pd.DataFrame(columns=['state', 'gini'])
         df_district = pd.DataFrame(columns=['state', 'gini','country_id'])
         df_region = pd.DataFrame(columns=['state', 'gini','district_id'])
@@ -77,19 +133,33 @@ class ZipParser:
         self.df_country = df_country.copy()
         self.df_district = df_district.copy()
         self.df_region = df_region.copy()
-                
-                
+                      
     def run(self, zip_dir, file_list):
+        """
+        Parse a list of zip files and return the resulting DataFrames.
+
+        Parameters
+        ----------
+        zip_dir : str
+            Path to the directory containing the zip files.
+        file_list : list
+            List of zip file names to parse.
+
+        Returns
+        -------
+        tuple
+            A tuple of three DataFrames, one for country, district, and region data, respectively.
+        """
         print("Beginning to parse zip files...")
         for file in file_list:
             path = f"{zip_dir}/{file}"
             if os.path.isfile(path):
                 print(f"Unzipping {file}")
-                self.unzip_file(path)
+                self.__unzip_file(path)
             else:
                 print(f"{file} not found")
                 
-        self.create_dataframes()
+        self.__create_dataframes()
         
         return self.df_country, self.df_district, self.df_region            
     

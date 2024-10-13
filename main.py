@@ -4,25 +4,34 @@ from db_connector import Connector
 
 def main():
     
+    """
+    Main function of the program. It will download the zip files, extract them, parse them into DataFrames, 
+    populate the database with the data, and then enter an optional command loop where you can query the database.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     zip_dir = 'zipfiles'
     unzip_dir = 'extraction'
     db_name = 'census.db'
     
     extractor = CensusExtractor(zip_dir)
-    
     if not extractor.run():
         print("Terminating execution - extraction failed")
         return
     
     unzipper = ZipParser(unzip_dir)
     df_country,df_district,df_region = unzipper.run(zip_dir, extractor.get_zip_list())
-    
     if df_country.empty or df_district.empty or df_region.empty:
         print("Terminating execution - dataframe creation failed")
         return
     
     connector = Connector(db_name)
-    connector.create_tables()
     if not connector.populate_tables(df_country,df_district,df_region):
         print("Terminating execution - table population failed")
         return
@@ -30,7 +39,8 @@ def main():
     print("Execution completed successfully")
     
     while True:
-        inp = input('''\n\nYou can now access the table via commands. Type 'country=',district=' or region=' to automatically retrieve values from the db\n
+        inp = input('''
+    You can now access the table via commands. Type 'country=',district=' or region=' to automatically retrieve values from the db\n
     You can also use modifier 'type=all' to values from subsquent tables\n
     e.g. "country=Brasil,type=all" will retrieve gini values from all districts of Brasil\n
     and "district=Amazonas,type=all" will retrieve gini values from all regions of Amazonas\n
