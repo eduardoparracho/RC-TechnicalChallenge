@@ -34,6 +34,7 @@ class ZipParser:
         df_country = pd.DataFrame(columns=['state', 'gini'])
         df_district = pd.DataFrame(columns=['state', 'gini','country_id'])
         df_region = pd.DataFrame(columns=['state', 'gini','district_id'])
+        
         for file in self.unzip_list:
             df = pd.read_excel(self.dir + "/" + file)
             df.columns = ['state','gini']
@@ -48,12 +49,14 @@ class ZipParser:
             df1['country_id'] = country_id
 
             df_district = pd.concat([df_district, df1], ignore_index=True)
+            df_district.drop_duplicates(inplace=True)
             district_id = df_district.index.max()
             
             df2 = df.iloc[2:].copy()
             df2['district_id'] = district_id
             
             df_region = pd.concat([df_region,df2], ignore_index=True)
+            df_region.drop_duplicates(inplace=True)
             
             
         df_country.columns = ['country_name','gini_index']
