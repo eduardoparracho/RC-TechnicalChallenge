@@ -110,6 +110,7 @@ class Connector:
             with sqlite3.connect(self.db_name) as conn:
                 cur = conn.execute(sql)
                 res = cur.fetchall()
+                conn.commit()
         except sqlite3.OperationalError as e:
             return e
         return res
