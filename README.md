@@ -111,6 +111,7 @@ The project was done with Docker as its container builder.
    docker run -it -p 4000:80 rc-technicalchallenge
    ```
 
+All files related to the execution will be under the 'app' directory inside the Docker container environment.
 
 ## Author
 
