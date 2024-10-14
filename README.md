@@ -113,6 +113,10 @@ The project was done with Docker as its container builder.
 
 All files related to the execution will be under the 'app' directory inside the Docker container environment.
 
+## GitHub
+
+The project was developed from the beginning on this repository. The commit history shows all changes done and even a PR was done as a showcase of what it could've looked like in a true production environment (as a feature implementation).
+
 ## Author
 
 Eduardo Parracho, eduardofilipe.parracho@gmail.com
