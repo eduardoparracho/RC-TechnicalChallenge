@@ -103,7 +103,7 @@ The project was done with Docker as its container builder.
 3. Build the docker Image:
 
    ```bash
-   docker build -t my-app-name .
+   docker build -t rc-technicalchallenge .
    ```
 4. Run the Docker Container (make sure to include '-it' in order to access the visualization commands):
 
