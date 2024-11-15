@@ -38,6 +38,18 @@ class CensusExtractor():
         """
         return self.zip_list
     
+    def get_zip_dir(self):
+        """
+        Get the directory where the zip files are stored.
+        
+        Returns
+        -------
+        str
+            Path to the directory where the zip files are stored.
+        """
+        
+        return self.dir
+    
     def __fetch_zip_list(self):  
         """
         Fetch the list of zip files from the IBGE website.
@@ -81,7 +93,7 @@ class CensusExtractor():
         try:
             response = requests.get(f"https://ftp.ibge.gov.br/Censos/Censo_Demografico_1991/Indice_de_Gini/{district_zip}")
         except requests.exceptions.ConnectionError as e:
-            return e
+            return response.status_code
             
         if response.status_code == 200:
             path = f"{self.dir}/{district_zip}" 

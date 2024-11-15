@@ -1,22 +1,44 @@
 import sqlite3
 import pandas as pd
 from typing import Literal
+import os
+
 class Connector:
-    def __init__(self,db_name):
+    def __init__(self,db_path):
+    
         """
-        Initialize a Connector object.
+        Initialize a Connector object and set up the database.
 
         Parameters
         ----------
-        db_name : str
-            Path to the SQLite database file. Will create one if it doesn't exist.
+        db_path : str
+            The name of the database file.
 
         Returns
         -------
-        None
+        int
+            Returns 1 if the database is newly created with tables, 
+            otherwise returns 0 if the database already exists.
         """
-        self.db_name = db_name
-        self.__create_tables()
+    
+        self.db_path = db_path
+        self.status = 0
+        
+        if not self.__check_for_db(): 
+            self.__create_tables()
+            self.status = 1
+        else:
+            self.status = 0
+        
+    def get_db_status(self):
+        return self.status
+    
+    def __check_for_db(self):
+        if os.path.isfile(self.db_path):
+            return 1
+        else:
+            return 0
+        
         
     def __create_tables(self):
         """
@@ -34,7 +56,7 @@ class Connector:
         -------
         None
         """
-        conn = sqlite3.connect(self.db_name)
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS Countries (
@@ -84,7 +106,7 @@ class Connector:
             1 if successful, otherwise an sqlite3.OperationalError
         """
         try:
-            with sqlite3.connect(self.db_name) as conn:
+            with sqlite3.connect(self.db_path) as conn:
                 df_country.to_sql('Countries', conn, if_exists='replace',index=False)
                 df_district.to_sql('Districts', conn, if_exists='replace',index=False)
                 df_region.to_sql('Regions', conn, if_exists='replace',index=False)
@@ -107,7 +129,7 @@ class Connector:
             List of tuples with the result of the query. If an sqlite3.OperationalError occurs, returns the error.
         """
         try:
-            with sqlite3.connect(self.db_name) as conn:
+            with sqlite3.connect(self.db_path) as conn:
                 cur = conn.execute(sql)
                 res = cur.fetchall()
                 conn.commit()
@@ -153,7 +175,7 @@ class Connector:
             if type == 'all':
                 sql = f"SELECT district_name,gini_index FROM Districts WHERE country_id IN (SELECT country_id FROM Countries WHERE country_name = '{country}')"
         
-        with sqlite3.connect(self.db_name) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cur = conn.execute(sql)
             gini = cur.fetchall()
             

@@ -2,6 +2,40 @@ from scrapper import CensusExtractor
 from zip_parser import ZipParser
 from db_connector import Connector
 
+def extract_data(extractor, unzipper, connector):
+    
+    """
+    Orchestrates the extraction of data from the IBGE website and its population into a database.
+
+    Parameters
+    ----------
+    extractor : CensusExtractor
+        Object responsible for extracting the data from the IBGE website.
+    unzipper : ZipParser
+        Object responsible for unzipping the extracted data and creating DataFrames out of it.
+    connector : Connector
+        Object responsible for connecting to the database and populating it with the extracted data.
+
+    Returns
+    -------
+    int
+        1 if successful, otherwise 0
+    """
+    if not extractor.run():
+        print("Terminating execution - extraction failed")
+        return 0
+    
+    df_country,df_district,df_region = unzipper.run(extractor.get_zip_dir(), extractor.get_zip_list())
+    if df_country.empty or df_district.empty or df_region.empty:
+        print("Terminating execution - dataframe creation failed")
+        return 0
+
+    if not connector.populate_tables(df_country,df_district,df_region):
+        print("Terminating execution - table population failed")
+        return 0
+    
+    return 1
+    
 def main():
     
     """
@@ -18,27 +52,34 @@ def main():
     """
     zip_dir = 'zipfiles'
     unzip_dir = 'extraction'
-    db_name = 'census.db'
+    db_path = 'data/census.db'
     
     extractor = CensusExtractor(zip_dir)
-    if not extractor.run():
-        print("Terminating execution - extraction failed")
-        return
-    
     unzipper = ZipParser(unzip_dir)
-    df_country,df_district,df_region = unzipper.run(zip_dir, extractor.get_zip_list())
-    if df_country.empty or df_district.empty or df_region.empty:
-        print("Terminating execution - dataframe creation failed")
-        return
+    connector = Connector(db_path)
+    db_status = connector.get_db_status()
     
-    connector = Connector(db_name)
-    if not connector.populate_tables(df_country,df_district,df_region):
-        print("Terminating execution - table population failed")
-        return
-    
-    print("Execution completed successfully")
-    
-    while True:
+    if db_status:
+        print('No database found. Downloading data...')
+        if extract_data(extractor,unzipper,connector):
+            print("Execution completed successfully")
+        else:
+            return
+    else:
+        while True:
+            inp = input(''' Database seems to already exist. Do you want to re-download data? (Y/N)''').lower()
+            if inp == 'y':
+                if extract_data(extractor,unzipper,connector):
+                    print("Execution completed successfully")
+                    break
+                else:
+                    return
+            if inp != 'n' and inp != 'y':
+                print('Type "Y" for Yes, "N" for No')
+            if inp == 'n':
+                break
+            
+    while True:   
         inp = input('''
     You can now access the table via commands. Type 'country=',district=' or region=' to automatically retrieve values from the db\n
     You can also use modifier 'type=all' to values from subsquent tables\n
