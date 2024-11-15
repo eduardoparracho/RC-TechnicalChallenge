@@ -103,15 +103,12 @@ The project was done with Docker as its container builder.
 3. Build the docker Image:
 
    ```bash
-   docker build -t rc-technicalchallenge .
-   ```
-4. Run the Docker Container (make sure to include '-it' in order to access the visualization commands):
-
-   ```bash
-   docker run -it -p 4000:80 rc-technicalchallenge
+   docker-compose run rc_service
    ```
 
 All files related to the execution will be under the 'app' directory inside the Docker container environment.
+
+The data folder will refer back to a docker volume that will be created while building this app. It serves to provide persistance to the database.
 
 ## GitHub
 
